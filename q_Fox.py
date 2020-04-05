@@ -1,12 +1,13 @@
 import numpy as np
 import numpy.linalg as la
 
+
 class Fox:
     def __init__(self, loc, target, a, g):
         self.Q = np.random.rand(2,2)/5.0 + 1.0
         self.state = 0 #state = 0 means the rabbit is unaware
-        self.loc = loc
-        self.target = target
+        self.loc = np.array(loc)
+        self.target = np.array(target)
         self.a = a
         self.g = g
         self.actions = np.ones([2, 2], dtype=np.float32)
@@ -28,23 +29,20 @@ class Fox:
     def iterate_simulation(self):
         # update set of actions given current positions of the fox and the rabbit
         self.update_actions()
-
-        #select an action based on the current Q matrix and take that action
         i_act = self.select_action()
-        print(i_act)
         act = self.actions[i_act, :]
         self.move(self.loc + act)
+
         if self.dist() <= 0.5:
             self.catch = True
             return
-        # play out the consequences and rewards of that action
+
         i_state = self.state
+
         if i_act == 0:
-            self.state = np.random.binomial(1, np.maximum(
-                2 - np.exp(self.dist()), np.exp(-1*self.dist())
-            ))
+            self.state = 1
         else:
-            self.state = np.random.binomial(1, np.exp(-1*self.dist()))
+            self.state = 0
 
         self.target = self.target + (1 - self.state)*(np.random.rand(2)-0.5)/2 + self.state*self.run_away()
         self.reward = 1/self.dist()
@@ -52,10 +50,16 @@ class Fox:
 
     def one_pass(self):
         self.catch = False
-        while self.catch == False:
+        fox_loc = np.array([self.loc])
+        rabbit_loc = np.array([self.target])
+        while not self.catch:
             self.iterate_simulation()
+            fox_loc = np.append(fox_loc, [self.loc], axis=0)
+            rabbit_loc = np.append(rabbit_loc, [self.target], axis=0)
+        return fox_loc, rabbit_loc
+
     def move(self, loc):
-        self.loc = loc
+        self.loc = np.array(loc)
 
     def dist(self):
         return la.norm(self.loc - self.target)
