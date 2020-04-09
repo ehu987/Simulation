@@ -54,10 +54,10 @@ def animate(x, y, title, xlim, ylim):
 def multi_animate(x, y, title):
     ### animate takes in N x 2 numpy arrays of data. x tracks the path of the predator (red), and y tracks the path of the prey (blue) ###
     n = len(x)
-    sizes = [len(x[k]) for k in range(10)]
+    sizes = [len(x[k]) for k in range(n)]
     x_all = np.vstack(x)
     y_all = np.vstack(y)
-    xlim = np.max(x_all) + 5
+    xlim = np.max(y_all) + 5
     ylim = np.max(y_all) + 5
     fig = go.Figure(
         # initial data
